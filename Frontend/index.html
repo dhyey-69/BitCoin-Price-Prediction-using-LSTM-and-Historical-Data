@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bitcoin Price Prediction</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            height: 100vh;
+            background: url('./915234.jpg') no-repeat center center/cover;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-attachment: fixed;
+            overflow: hidden;
+        }
+
+        .quote {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+            color: #fff;
+            font-weight: 600;
+            font-size: 24px;
+            background-color: rgba(23, 24, 25, 0.7);
+            padding: 15px 30px;
+            border-radius: 8px;
+            animation: moveQuote 15s linear infinite;
+            z-index: 1000;
+        }
+
+        @keyframes moveQuote {
+            0% {
+                transform: translateX(100%);
+            }
+            100% {
+                transform: translateX(-100%);
+            }
+        }
+
+        h1 {
+            background-color: rgba(23, 24, 25, 0.5);
+            padding: 10px;
+            border-radius: 8px;
+            color: #fff;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        #container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            backdrop-filter: blur(4px);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2), 0 0 20px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 40px;
+            text-align: center;
+            color: #fff;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        label {
+            font-size: 18px;
+            color: #fff;
+            background-color: rgba(23, 24, 25, 0.5);
+            padding: 5px;
+            border-radius: 4px;
+        }
+
+        input[type="date"] {
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 6px;
+            margin-top: 10px;
+            width: 100%;
+            background: rgba(23, 24, 25, 0.5);
+            color: #fff;
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 12px 20px;
+            font-size: 16px;
+            background-color: rgba(0, 123, 255, 0.8);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: rgba(0, 123, 255, 1);
+        }
+
+        #loading {
+            display: none;
+            color: #007bff;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        #result {
+            margin-top: 20px;
+            font-size: 20px;
+            color: #000000;
+        }
+
+        #error {
+            color: #dc3545;
+            font-size: 18px;
+            margin-top: 10px;
+        }
+
+        @media (max-width: 768px) {
+            #container {
+                width: 90%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="quote">"Bitcoin is a digital currency that’s not controlled by any government. That makes it powerful, but also a little scary!"</div>
+
+    <div id="container">
+        <h1>Bitcoin Price Prediction</h1>
+        <form id="predictionForm">
+            <label for="date">Enter Date (DD-MM-YYYY):</label>
+            <input type="date" id="date" name="date" required><br><br>
+            <button type="submit">Predict</button>
+        </form>
+
+        <p id="loading">Predicting...</p>
+        <h2 id="result"></h2>
+        <p id="error"></p>
+    </div>
+    <script>
+        document.getElementById('predictionForm').addEventListener('submit', function (event) {
+            event.preventDefault(); // Prevent form submission
+
+            const dateInput = document.getElementById('date').value;
+            const resultElement = document.getElementById('result');
+            const errorElement = document.getElementById('error');
+            const loadingElement = document.getElementById('loading');
+
+            resultElement.innerText = ''; // Clear previous result
+            errorElement.innerText = ''; // Clear previous error
+            loadingElement.style.display = 'block';  // Show loading indicator
+
+            fetch('http://127.0.0.1:5000/predict', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ date: dateInput }) // Send date as JSON
+            })
+                .then(response => {
+                    loadingElement.style.display = 'none';  // Hide loading indicator
+                    if (!response.ok) {
+                        throw new Error('Prediction failed');
+                    }
+                    return response.json(); // Parse JSON response
+                })
+                .then(data => {
+                    resultElement.innerText = 'Predicted Price: $' + data.predicted_close
+                })
+                .catch(error => {
+                    errorElement.innerText = 'Error: ' + error.message; // Handle errors
+                });
+        });
+    </script>
+</body>
+
+</html>
